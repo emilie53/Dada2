@@ -23,9 +23,7 @@ sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
 ```{r}
 plotQualityProfile(fnFs[1:2])
 ```
-```{r}
-plotQualityProfile(fnRs[1:2])
-```
+
 
 ```{r}
 # Place filtered files in filtered/ subdirectory
@@ -35,10 +33,27 @@ names(filtFs) <- sample.names
 names(filtRs) <- sample.names
 ```
 
+
 ```{r}
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,160),
               maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE,
-              compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE (only needed for filterAndTrim)
+              compress=TRUE, multithread=TRUE)
 head(out)
+```
+
+```{r}
+errF <- learnErrors(filtFs, multithread=TRUE)
+```
+
+```{r}
+errR <- learnErrors(filtRs, multithread=TRUE)
+```
+
+```{r}
+plotErrors(errF, nominalQ=TRUE)
+```
+
+```{r}
+dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
 ```
 
