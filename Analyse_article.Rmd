@@ -1,0 +1,9 @@
+---
+title: "R Notebook"
+output: github_document
+---
+
+```{r}
+meta_data <- read.csv("SraRunTable.csv" , sep = "," , header = TRUE)
+```
+
