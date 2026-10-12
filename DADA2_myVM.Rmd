@@ -147,11 +147,16 @@ cat("Of those,", sum(match.ref), "were exact matches to the expected reference s
 install.packages("igraph", type = "source")
 BiocManager::install("phyloseq", update = FALSE)
 ```
+#j'installe libglpk40 via le Terminal (apt-get install) afin de charger igraph (car bug, debloqué par Claude AI)
 
 ```{r}
-library(phyloseq); packageVersion("phyloseq")
+library(igraph)
 ```
 
+```{r}
+BiocManager::install("phyloseq")
+library(phyloseq); packageVersion("phyloseq")
+```
 
 ```{r}
 library(Biostrings); packageVersion("Biostrings")
@@ -164,6 +169,7 @@ library(ggplot2); packageVersion("ggplot2")
 ```{r}
 theme_set(theme_bw())
 ```
+#change l’apparence par défaut de tous les graphiques ggplot2
 
 ```{r}
 samples.out <- rownames(seqtab.nochim)
@@ -177,6 +183,8 @@ samdf$When[samdf$Day>100] <- "Late"
 rownames(samdf) <- samples.out
 ```
 
+#phyloseq se sert de ces noms pour faire correspondre les métadonnées avec la table de séquences. Ce code ne marche que parce que les noms de fichiers du tutoriel suivent le schéma [sexe][souris]D[jour].
+
 ```{r}
 ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE),
                sample_data(samdf),
@@ -184,5 +192,38 @@ ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE),
 ps <- prune_samples(sample_names(ps) != "Mock", ps) # Remove mock sample
 ```
 
+#assembler l’objet avec la table d’abondances + indique l’orientation de la table + les métadonnées + la taxonomie de chaque ASV (Phylum, Classe, Genre...), issue de l’étape assignTaxonomy de dada2.
+#retirer l’échantillon Mock car pas un echantillon biologique 
 
+```{r}
+dna <- Biostrings::DNAStringSet(taxa_names(ps))
+names(dna) <- taxa_names(ps)
+ps <- merge_phyloseq(ps, dna)
+taxa_names(ps) <- paste0("ASV", seq(ntaxa(ps)))
+ps
+```
+
+```{r}
+plot_richness(ps, x="Day", measures=c("Shannon", "Simpson"), color="When")
+```
+# Pour visualiser l'alpha diversité = nombre d'espèces présentes dans un milieu donné
+
+```{r}
+# Transform data to proportions as appropriate for Bray-Curtis distances
+ps.prop <- transform_sample_counts(ps, function(otu) otu/sum(otu))
+ord.nmds.bray <- ordinate(ps.prop, method="NMDS", distance="bray")
+```
+
+#ordination : ≠ profondeurs de séquençage. donc  normalisation, (sinon un échantillon très séquencé paraîtrait différent d’un autre simplement à cause du nombre de lectures, et non de sa composition. 
+#une représentation en deux dimensions des ressemblances entre tes échantillons.
+
+```{r}
+plot_ordination(ps.prop, ord.nmds.bray, color="When", title="Bray NMDS")
+```
+```{r}
+top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
+ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+ps.top20 <- prune_taxa(top20, ps.top20)
+plot_bar(ps.top20, x="Day", fill="Family") + facet_wrap(~When, scales="free_x")
+```
 
