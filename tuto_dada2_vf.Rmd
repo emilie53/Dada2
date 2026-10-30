@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
 output: github_document
+author: "Emilie Jeanson"
+
 ---
 
 Ce notebook est produit au format `github_document` : le fichier `.md` généré peut être poussé sur GitHub pour conserver le code et les sorties.
@@ -403,5 +405,6 @@ ps.top20 <- prune_taxa(top20, ps.top20)
 # facet_wrap() : un panneau par valeur de "When"
 plot_bar(ps.top20, x="Day", fill="Family") + facet_wrap(~When, scales="free_x")
 ```
+*Remarques sur la mise en place et le débogage du pipeline*. Plusieurs ajustements ont été nécessaires pour que le notebook s’exécute de bout en bout. Pour charger igraph (nécessaire à phyloseq), il a fallu installer au préalable la bibliothèque système libglpk40 via le Terminal. Le téléchargement du jeu de données MiSeq SOP s’est révélé problématique : wget recréait une copie du fichier à chaque exécution (miseqsopdata.zip.1, .2, etc.) et unzip restait bloqué en attendant une confirmation d’écrasement, impossible à donner dans un chunk. Nous avons donc utilisé les options -nc (ne pas retélécharger un fichier déjà présent) et -o (écraser sans demander). Comme les données étaient déjà sur le disque, tous les chunks de téléchargement (wget) ont reçu l’option eval=FALSE, avec une virgule après bash, afin qu’ils ne se relancent pas lors du Knit. Les fichiers de référence SILVA avaient un ? dans leur nom, hérité de l’URL, et avaient été téléchargés plusieurs fois : les doublons ont été supprimés, le fichier a été renommé sans le ?, et le chemin donné à assignTaxonomy() a été mis à jour.
 
 fin !

@@ -1,5 +1,6 @@
 R Notebook
 ================
+Emilie Jeanson
 
 Ce notebook est produit au format `github_document` : le fichier `.md`
 généré peut être poussé sur GitHub pour conserver le code et les
@@ -581,9 +582,9 @@ BiocManager::install("phyloseq")
     ##     class, cluster, foreign, KernSmooth, lattice, MASS, Matrix, nlme, nnet,
     ##     spatial, survival
 
-    ## Old packages: 'arrow', 'curl', 'duckdb', 'gert', 'lambda.r', 'RcppArmadillo',
-    ##   'readxl', 'roxygen2', 'S4Arrays', 'S4Vectors', 'selectr', 'sp',
-    ##   'SparseArray', 'tinytex', 'xfun'
+    ## Old packages: 'arrow', 'curl', 'duckdb', 'gargle', 'gert', 'googledrive',
+    ##   'googlesheets4', 'lambda.r', 'RcppArmadillo', 'readxl', 'roxygen2',
+    ##   'S4Arrays', 'S4Vectors', 'selectr', 'sp', 'SparseArray', 'tinytex', 'xfun'
 
 ``` r
 library(phyloseq); packageVersion("phyloseq")
@@ -806,35 +807,41 @@ ord.nmds.bray <- ordinate(ps.prop, method="NMDS", distance="bray")
 ```
 
     ## Run 0 stress 0.08043117 
-    ## Run 1 stress 0.08076336 
-    ## ... Procrustes: rmse 0.01048285  max resid 0.03225875 
-    ## Run 2 stress 0.08076338 
-    ## ... Procrustes: rmse 0.01052069  max resid 0.03238224 
-    ## Run 3 stress 0.1274324 
-    ## Run 4 stress 0.1212044 
-    ## Run 5 stress 0.08616061 
+    ## Run 1 stress 0.1212044 
+    ## Run 2 stress 0.08616061 
+    ## Run 3 stress 0.08076337 
+    ## ... Procrustes: rmse 0.01051901  max resid 0.03237685 
+    ## Run 4 stress 0.08076339 
+    ## ... Procrustes: rmse 0.01053358  max resid 0.03242472 
+    ## Run 5 stress 0.08076337 
+    ## ... Procrustes: rmse 0.01047897  max resid 0.03224597 
     ## Run 6 stress 0.08076338 
-    ## ... Procrustes: rmse 0.01053393  max resid 0.03242542 
-    ## Run 7 stress 0.08616061 
-    ## Run 8 stress 0.08616061 
-    ## Run 9 stress 0.1010633 
-    ## Run 10 stress 0.08076336 
-    ## ... Procrustes: rmse 0.01048391  max resid 0.03226221 
-    ## Run 11 stress 0.08076341 
-    ## ... Procrustes: rmse 0.01057253  max resid 0.0325513 
-    ## Run 12 stress 0.08616061 
-    ## Run 13 stress 0.1010632 
-    ## Run 14 stress 0.08616061 
+    ## ... Procrustes: rmse 0.01052507  max resid 0.03239808 
+    ## Run 7 stress 0.09477224 
+    ## Run 8 stress 0.0807634 
+    ## ... Procrustes: rmse 0.01055792  max resid 0.0325037 
+    ## Run 9 stress 0.08616061 
+    ## Run 10 stress 0.09477212 
+    ## Run 11 stress 0.08616061 
+    ## Run 12 stress 0.08076341 
+    ## ... Procrustes: rmse 0.01057408  max resid 0.03255639 
+    ## Run 13 stress 0.08076346 
+    ## ... Procrustes: rmse 0.01061792  max resid 0.03269879 
+    ## Run 14 stress 0.08076337 
+    ## ... Procrustes: rmse 0.01051679  max resid 0.03236938 
     ## Run 15 stress 0.08616061 
-    ## Run 16 stress 0.08043117 
-    ## ... Procrustes: rmse 5.771672e-06  max resid 1.451834e-05 
-    ## ... Similar to previous best
-    ## Run 17 stress 0.1320348 
-    ## Run 18 stress 0.1212044 
-    ## Run 19 stress 0.08076337 
-    ## ... Procrustes: rmse 0.01051389  max resid 0.03236018 
-    ## Run 20 stress 0.36991 
-    ## *** Best solution repeated 1 times
+    ## Run 16 stress 0.08076339 
+    ## ... Procrustes: rmse 0.01054578  max resid 0.03246414 
+    ## Run 17 stress 0.0807634 
+    ## ... Procrustes: rmse 0.01056653  max resid 0.03253186 
+    ## Run 18 stress 0.08076337 
+    ## ... Procrustes: rmse 0.01049392  max resid 0.0322949 
+    ## Run 19 stress 0.08076339 
+    ## ... Procrustes: rmse 0.01054438  max resid 0.03245942 
+    ## Run 20 stress 0.1212044 
+    ## *** Best solution was not repeated -- monoMDS stopping criteria:
+    ##     18: stress ratio > sratmax
+    ##      2: scale factor of the gradient < sfgrmin
 
 ``` r
 # plot_ordination() : trace l'ordination, colorée selon la variable "When"
@@ -863,5 +870,21 @@ plot_bar(ps.top20, x="Day", fill="Family") + facet_wrap(~When, scales="free_x")
 ```
 
 ![](tuto_dada2_vf_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+*Remarques sur la mise en place et le débogage du pipeline*. Plusieurs
+ajustements ont été nécessaires pour que le notebook s’exécute de bout
+en bout. Pour charger igraph (nécessaire à phyloseq), il a fallu
+installer au préalable la bibliothèque système libglpk40 via le
+Terminal. Le téléchargement du jeu de données MiSeq SOP s’est révélé
+problématique : wget recréait une copie du fichier à chaque exécution
+(miseqsopdata.zip.1, .2, etc.) et unzip restait bloqué en attendant une
+confirmation d’écrasement, impossible à donner dans un chunk. Nous avons
+donc utilisé les options -nc (ne pas retélécharger un fichier déjà
+présent) et -o (écraser sans demander). Comme les données étaient déjà
+sur le disque, tous les chunks de téléchargement (wget) ont reçu
+l’option eval=FALSE, avec une virgule après bash, afin qu’ils ne se
+relancent pas lors du Knit. Les fichiers de référence SILVA avaient un ?
+dans leur nom, hérité de l’URL, et avaient été téléchargés plusieurs
+fois : les doublons ont été supprimés, le fichier a été renommé sans le
+?, et le chemin donné à assignTaxonomy() a été mis à jour.
 
 fin !
